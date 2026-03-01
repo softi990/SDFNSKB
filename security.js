@@ -40,22 +40,6 @@
         e.preventDefault();
     });
 
-    // 5. Advanced Debugger Trap (Crashes Dev Tools if they force it open)
-    setInterval(function () {
-        const pre = performance.now();
-        debugger;
-        const post = performance.now();
-        // If debugger paused execution, performance diff will be high
-        if (post - pre > 100) {
-            document.body.innerHTML = "<h1 style='color:red; text-align:center; margin-top:50px;'>SECURITY ALERT: DEVELOPER TOOLS DETECTED</h1>";
-        }
-    }, 1000);
-
-    // 6. Clear Console continuously to hide logged data
-    setInterval(() => {
-        console.clear();
-        console.log("%cStop!", "color: red; font-size: 50px; font-weight: bold;");
-        console.log("%cThis is a restricted browser feature intended for developers.", "font-size: 16px;");
-    }, 2000);
+    // (Debugger trap removed as it breaks video stream in prod)
 
 })();

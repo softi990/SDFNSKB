@@ -127,10 +127,10 @@ async function loadStream() {
             }
         },
         streaming: {
-            bufferingGoal: 5,          // Buffer 5 seconds ahead
-            rebufferingGoal: 2,        // Wait 2s to resume for stability
-            bufferBehind: 5,           // Keep 5 seconds behind the load
-            lowLatencyMode: true,      // Enable LL-DASH mode
+            bufferingGoal: 45,         // Deep buffer (45 seconds ahead) to withstand long network drops
+            rebufferingGoal: 5,        // Ensure 5 solid seconds are downloaded before resuming after a pause
+            bufferBehind: 30,          // Keep 30 seconds of past footage Memory for smooth seeking/resumes
+            lowLatencyMode: false,     // Disabled: Causes fatal live-edge crashes on long sessions
             ignoreTextStreamFailures: true,
             alwaysStreamText: false,
             stallEnabled: true,        // Detect network stalls gracefully
@@ -146,8 +146,8 @@ async function loadStream() {
         },
         manifest: {
             dash: {
-                autoCorrectDrift: true, // Keeps sync solid on LIVE events
-                defaultPresentationDelay: 5 // Keep playback strict 5 seconds behind Live edge
+                autoCorrectDrift: true,
+                defaultPresentationDelay: 20 // Keep playback 20 seconds behind live to guarantee chunks exist
             },
             retryParameters: {
                 maxAttempts: 10,
