@@ -127,27 +127,27 @@ async function loadStream() {
             }
         },
         streaming: {
-            bufferingGoal: 45,         // Deep buffer (45 seconds ahead) to withstand long network drops
-            rebufferingGoal: 5,        // Ensure 5 solid seconds are downloaded before resuming after a pause
-            bufferBehind: 30,          // Keep 30 seconds of past footage Memory for smooth seeking/resumes
-            lowLatencyMode: false,     // Disabled: Causes fatal live-edge crashes on long sessions
+            bufferingGoal: 45,         // Safe buffer size
+            rebufferingGoal: 5,        // Ensure solid download before resuming
+            bufferBehind: 30,          // Keep some memory 
+            lowLatencyMode: false,
             ignoreTextStreamFailures: true,
             alwaysStreamText: false,
-            stallEnabled: true,        // Detect network stalls gracefully
-            stallThreshold: 2,         // Considered stalled after 2 seconds
-            jumpLargeGaps: true,       // Enable jumping if a huge gap happens to avoid frozen stream
+            stallEnabled: true,
+            stallThreshold: 2,         // Safe stall threshold 
+            jumpLargeGaps: true,
             retryParameters: {
-                maxAttempts: 10,       // Very resilient fetching
+                maxAttempts: 10,       // Resilient fetching
                 baseDelay: 1000,
                 backoffFactor: 1.5,
                 fuzzFactor: 0.3,
-                timeout: 10000         // Low timeout so we can aggressively retry failed chunks
+                timeout: 10000         // Stable timeout to prevent false connection failures
             }
         },
         manifest: {
             dash: {
                 autoCorrectDrift: true,
-                defaultPresentationDelay: 20 // Keep playback 20 seconds behind live to guarantee chunks exist
+                defaultPresentationDelay: 20 // Keep proper distance from live edge to avoid 404 chunks
             },
             retryParameters: {
                 maxAttempts: 10,
@@ -159,10 +159,10 @@ async function loadStream() {
         },
         abr: {
             enabled: true,
-            defaultBandwidthEstimate: 2000000, // 2 Mbps default start to jump into HD faster
-            switchInterval: 2,                 // Evaluate bitrate frequently
-            bandwidthUpgradeTarget: 0.85,      // Switch up more aggressively
-            bandwidthDowngradeTarget: 0.95     // Delay downgrade to avoid quality snapping
+            defaultBandwidthEstimate: 1500000, // 1.5 Mbps default
+            switchInterval: 2,                 // Evaluate every 2s
+            bandwidthUpgradeTarget: 0.85,
+            bandwidthDowngradeTarget: 0.95
         }
     });
 
@@ -172,11 +172,16 @@ async function loadStream() {
         retryCount = 0;
 
         // Ensure seamless autoplay and recovery
-        video.muted = true; // Required by browsers to autoplay un-interacted
+        video.muted = false; // Attempt to start unmuted
         video.play().catch((err) => {
             console.warn('[NexusStream] Playback rejected by browser:', err);
-            // Sometimes browsers need interaction, we listen for next click
-            document.addEventListener('click', () => video.play(), { once: true });
+            // Fallback to muted playback so the stream starts without pausing
+            video.muted = true;
+            video.play().catch(() => { });
+            // Unmute upon first user interaction
+            document.addEventListener('click', () => {
+                video.muted = false;
+            }, { once: true });
         });
     } catch (e) {
         console.error('[NexusStream] Stream loading failed:', e);
@@ -244,9 +249,24 @@ async function initPlayer() {
         // Active Safeguard Watchdog: prevents indefinite freezing on long streams
         let lastTime = -1;
         let stalledCount = 0;
+        let idleTime = 0;
 
         setInterval(() => {
-            if (!video || video.paused || !shakaPlayer) return;
+            if (!video || !shakaPlayer) return;
+
+            // Track if stream is paused or stuck completely
+            if (video.paused || video.currentTime === lastTime) {
+                idleTime += 5;
+                if (idleTime >= 30) {
+                    console.warn('[NexusStream] Stream paused or not working for 30s. Auto-reloading page...');
+                    location.reload();
+                    return;
+                }
+            } else {
+                idleTime = 0;
+            }
+
+            if (video.paused) return;
 
             // Check if playhead is stuck
             if (video.currentTime === lastTime && video.readyState < 3) {
@@ -353,3 +373,39 @@ function toggleAudioBoost() {
         status.style.color = boostActive ? 'var(--accent)' : 'var(--text-secondary)';
     }
 }
+
+// ── Ad Refresh ───────────────────────────────────────
+function initAdRefresh() {
+    // Refresh ads every 5 minutes (300,000 ms)
+    setInterval(() => {
+        const adContainers = document.querySelectorAll('.adsterra-container');
+        adContainers.forEach(container => {
+            // To force ad scripts to re-execute, we have to detach and re-attach the script tags
+            const content = container.innerHTML;
+            container.innerHTML = '';
+
+            // Allow DOM to clear, then re-insert to trigger script loading again
+            setTimeout(() => {
+                // We use document fragment approach if there are scripts, because innerHTML doesn't execute <script>
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = content;
+
+                Array.from(tempDiv.childNodes).forEach(node => {
+                    if (node.tagName && node.tagName.toLowerCase() === 'script') {
+                        // Recreate script element to force browser to run it again
+                        const newScript = document.createElement('script');
+                        Array.from(node.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                        newScript.textContent = node.textContent;
+                        container.appendChild(newScript);
+                    } else {
+                        container.appendChild(node.cloneNode(true));
+                    }
+                });
+            }, 50);
+        });
+        console.log('[NexusStream] Ad placements automatically refreshed.');
+    }, 300000); // 300,000 ms = 5 minutes
+}
+
+// Start watching for Ad refresh
+initAdRefresh();
