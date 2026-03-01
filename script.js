@@ -4,9 +4,9 @@
 
 // Stream source — DASH MPD with ClearKey DRM
 // Automatically decoded at runtime to prevent simple scraping
-const _E_URL = 'aHR0cHM6Ly9saXZlLXB2LXRhLmFtYXpvbi5mYXN0bHktZWRnZS5jb20vbGhyLW5pdHJvL2xpdmUvY2xpZW50cy9kYXNoL2VuYy93d3JtaG84MnBjL291dC92MS9kNzEzMGY0NjBkNDE0ODZlYTdlOGUzZWI0NWYwNTIyZi9jZW5jLm1wZA==';
-const _E_KID = 'YmFhZmRiOGViY2JiYzA2NTUzMzIyOTFkYTZmMTIxZGE=';
-const _E_KVAL = 'NjBhYzg5MmUwZWEwYjJjNDZmYzY4MzdjOTdlZDY0MWE=';
+const _E_URL = 'aHR0cHM6Ly9vdHRlLmxpdmUuZmx5Lnd3LmFpdi1jZG4ubmV0L3Npbi1uaXRyby9saXZlL2NsaWVudHMvZGFzaC9lbmMvZWNwNnhpZGM1ZC9vdXQvdjEvYjhhOTQ2NzdjNTZlNDQxMWFlZjdlY2MyNDMxY2VjMGEvY2VuYy5tcGQ=';
+const _E_KID = 'MGMxY2IzZTk1MTRkZGRkNzU4OTZhN2Y2MGEwM2RlY2I=';
+const _E_KVAL = 'OTYzZmIxNzVmNzA3NjljOGQ1NmZjNDRjODQzODA4YjM=';
 
 const STREAM_URL = atob(_E_URL);
 const DRM_KEY_ID = atob(_E_KID);
