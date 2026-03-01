@@ -99,9 +99,9 @@
         overflow-x: auto;
     }
 
-    .adsterra-container iframe {
-        max-width: 100% !important;
-        /* Forces ads to shrink on small screens */
+    /* Allow swiping for ads with fixed width instead of horizontally squishing them */
+    .adsterra-container {
+        padding: 5px 0;
     }
 
     .stat-item {

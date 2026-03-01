@@ -274,18 +274,26 @@ footer {
 }
 
 /* Ensure link components for ads are properly displayed */
-.adsterra-container,
-.ad-slot {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
+.adsterra-container {
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin: 0 auto;
 }
 
 .adsterra-container a,
 .ad-slot a {
-    display: block !important;
+    display: inline-block !important;
     max-width: 100%;
+    min-height: 50px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    word-break: break-all;
+}
+
+.adsterra-container iframe,
+.ad-slot iframe {
+    display: inline-block !important;
     visibility: visible !important;
     opacity: 1 !important;
 }
