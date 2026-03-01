@@ -240,7 +240,6 @@ header {
     font-size: 0.8rem;
     text-align: center;
     position: relative;
-    overflow: hidden;
     padding-top: 20px;
     /* Give some visual clearance for the absolute span */
 }
