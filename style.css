@@ -272,3 +272,20 @@ footer {
 .uc {
     pointer-events: none;
 }
+
+/* Ensure link components for ads are properly displayed */
+.adsterra-container,
+.ad-slot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.adsterra-container a,
+.ad-slot a {
+    display: block !important;
+    max-width: 100%;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
